@@ -1,0 +1,13 @@
+<mujocoinclude>
+    <body childclass="cm_base" name="mug">
+
+      <geom name="mug"
+      mesh="mug"
+      pos="0 0 0.034"
+      material="cmwhite"/>
+      <geom material="cmwhite" euler="0 0 0" mesh="handle" pos="0.039 0 0.047" />
+      <geom class="cm_col" pos="0 0 0.035" size="0.028 0.032" type="cylinder" mass="10"/>
+      <geom class="cm_col" euler="0 0 0" pos="0.034 0 0.042" size="0.02 0.005" type="cylinder" mass="1"/>
+
+    </body>
+</mujocoinclude>

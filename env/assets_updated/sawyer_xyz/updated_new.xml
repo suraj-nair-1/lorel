@@ -1,0 +1,52 @@
+<mujoco>
+    <include file="../scene/basic_scene.xml"/>
+    <include file="../objects/assets/drawer_dependencies.xml"/>
+    <include file="../objects/assets/xyz_base_dependencies.xml"/>
+    <include file="../objects/assets/block_dependencies.xml"/>
+    <include file="../objects/assets/coffeemachine_dependencies.xml"/>
+    <include file="../objects/assets/puck_goal_dependencies.xml"/>
+    <include file="../objects/assets/buttonbox_dependencies.xml"/>
+    <include file="../objects/assets/faucet_dependencies.xml"/>
+    <include file="../objects/assets/thermos_dependencies.xml"/>
+    <size nconmax="200"/>
+    <worldbody>
+        <include file="sawyer_xyz_base_no_table.xml"></include>
+
+       <camera mode="targetbody" name="cam0" pos="-0.45 0.95 0.45" target="goal"/>
+
+      <body name="goal" pos="-0.1 0.6 0">
+          <geom rgba="1 0 0 1" pos="0 0 -.02" mesh="block"/>
+        </body>
+    
+        
+      <body name="obj" pos="-0.0, 0.5, 0.00">
+          <include file="../objects/assets/mug.xml"/>
+          <joint type="slide" range="-0.1 0.1" axis="1 0 0" name="obj_slidex" pos="0 0 0" damping="200"/>
+          <joint type="slide" range="-0.1 0.1" axis="0 1 0" name="obj_slidey" pos="0 0 0" damping="200"/>
+        </body>
+      
+      <body name="obj2" pos="-0.0, 0.5, 0.00">
+          <include file="../objects/assets/mug2.xml"/>
+          <joint type="slide" range="-0.1 0.1" axis="1 0 0" name="obj2_slidex" pos="0 0 0" damping="200"/>
+          <joint type="slide" range="-0.1 0.1" axis="0 1 0" name="obj2_slidey" pos="0 0 0" damping="200"/>
+        </body>
+      
+      
+        <body name="faucetBase" pos="-0.05 0.8 0">
+            <include file="../objects/assets/faucet2.xml"/>
+        </body>
+      <body name="drawer" pos="0.3 0.6 0" quat="0.707 0.0 0.0 -0.707">
+            <include file="../objects/assets/drawer.xml"/>
+        </body>
+        
+    </worldbody>
+
+    <actuator>
+        <position ctrllimited="true" ctrlrange="-1 1" joint="r_close" kp="400"  user="1"/>
+        <position ctrllimited="true" ctrlrange="-1 1" joint="l_close" kp="400"  user="1"/>
+    </actuator>
+    <equality>
+        <weld body1="mocap" body2="hand" solref="0.02 1"></weld>
+    </equality>
+
+</mujoco>

@@ -1,0 +1,8 @@
+<mujocoinclude>
+    <body childclass="block_base">
+      <inertial pos="0 0 0" mass=".75" diaginertia="8.80012e-04 8.80012e-04 8.80012e-04"/>
+      <geom material="block_red" pos="0 0 0" size="0.03 0.015" type="cylinder"/>
+      <geom class="block_col" pos="0 0 0" size="0.03 0.015" type="cylinder"
+      	solimp="0.99 0.99 0.01" solref="0.01 1"/>
+    </body>
+</mujocoinclude>
