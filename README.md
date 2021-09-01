@@ -27,6 +27,19 @@ You can also train the LORL reward on the pre-collected real robot dataset, cons
 
 `python train_lorl.py  --batchsize=32 --datapath=<PATH TO ROBOT DATA FOLDER> --savedir=logs/ --expname=<EXPERIMENT NAME> --num_labeled=<HOW MANY EPISODES TO USE> --aug=1 --hidden_size=128 --trainsteps=400000 --fn=1 --robot=1 --langaug=1 --alpha=0.25`
 
+If you do use the real robot data, please cite the project from which the data was collected.
+`
+@inproceedings{
+anonymous2021exampledriven,
+title={Example-Driven Model-Based Reinforcement Learning for Solving Long-Horizon Visuomotor Tasks},
+author={Anonymous},
+booktitle={Submitted to 5th Annual Conference on Robot Learning },
+year={2021},
+url={https://openreview.net/forum?id=_daq0uh6yXr},
+note={under review}
+}
+`
+
 ## Visual Dynamics Model
 
 If you want to use the same visual planning pipeline as the paper, you will need to use the SV2P video prediction model [Babaeizadeh et al]. The code for this model is part of the `tensor2tensor` package, and you'll want to clone and install this [custom version of tensor2tensor](https://github.com/suraj-nair-1/tensor2tensor). This installation is tricky - it will automatically upgrade the tensorflow version, however SV2P still requires and old version. You will need to downgrade `tensorflow-gpu` and associated tensorflow packages `tensorflow-probability`, etc. to the ones listed in the `requirements.txt`. You'll also need to manually install `gast=0.2.2`. 
