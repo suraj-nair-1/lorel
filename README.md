@@ -37,5 +37,5 @@ If the above is done correctly, you should be able to directly load the pre-trai
 
 Finally, given the trained SV2P model and trained LORL reward, you can run CEM planning to complete language-conditioned tasks with the following command:
 
-`python run_planning.py --batchsize=<NUMBER OF TRIALS> --savedir=logs/ --expname=<EXPERIMENT NAME> --reward_path=<PATH TO LORL REWARD CHECKPOINT> --cost="lorl" --instruction="turn faucet right" --verbose=0 --hidden_size=128 --cem_iters=3 --samples=200 --model_path=<PATH TO SV2P DIRECTORY>.
+`python run_planning.py --batchsize=<NUMBER OF TRIALS> --savedir=logs/ --expname=<EXPERIMENT NAME> --reward_path=<PATH TO LORL REWARD CHECKPOINT> --cost="lorl" --instruction="turn faucet right" --verbose=0 --hidden_size=128 --cem_iters=3 --samples=200 --model_path=<PATH TO SV2P DIRECTORY>`
 
