@@ -28,7 +28,7 @@ You can also train the LORL reward on the pre-collected real robot dataset, cons
 `python train_lorl.py  --batchsize=32 --datapath=<PATH TO ROBOT DATA FOLDER> --savedir=logs/ --expname=<EXPERIMENT NAME> --num_labeled=<HOW MANY EPISODES TO USE> --aug=1 --hidden_size=128 --trainsteps=400000 --fn=1 --robot=1 --langaug=1 --alpha=0.25`
 
 If you do use the real robot data, please cite the project from which the data was collected.
-`
+```
 @inproceedings{
 anonymous2021exampledriven,
 title={Example-Driven Model-Based Reinforcement Learning for Solving Long-Horizon Visuomotor Tasks},
@@ -38,7 +38,7 @@ year={2021},
 url={https://openreview.net/forum?id=_daq0uh6yXr},
 note={under review}
 }
-`
+```
 
 ## Visual Dynamics Model
 
