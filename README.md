@@ -1,6 +1,6 @@
 # Code for the paper "Learning Language-Conditioned Robot Behavior from Offline Data and Crowd-Sourced Annotation"
 
-This is code for the paper "Learning Language-Conditioned Robot Behavior from Offline Data and Crowd-Sourced Annotation" Suraj Nair, Eric Mitchell, Kevin Chen, Brian Ichter, Silvio Savarese, Chelsea Finn. 
+This is code for the paper "Learning Language-Conditioned Robot Behavior from Offline Data and Crowd-Sourced Annotation" Suraj Nair, Eric Mitchell, Kevin Chen, Brian Ichter, Silvio Savarese, Chelsea Finn. CoRL 2021.
 
 The code contains the Mujoco simulation environments used for training the agent, as well as the data collection script used to collect data and annotations from the simulator. It also contains the training script to train the LORL language-conditioned reward function from either the simulated data (or pre-collected real robot data). It also contains code to load a pre-trained visual dynamics model, and use the dynamics model with the LORL reward for executing language-conditioned tasks in simulation.
 
@@ -30,13 +30,12 @@ You can also train the LORL reward on the pre-collected real robot dataset, cons
 If you do use the real robot data, please cite the project from which the data was collected.
 ```
 @inproceedings{
-anonymous2021exampledriven,
+wu2021exampledriven,
 title={Example-Driven Model-Based Reinforcement Learning for Solving Long-Horizon Visuomotor Tasks},
-author={Anonymous},
-booktitle={Submitted to 5th Annual Conference on Robot Learning },
+author={Bohan Wu and Suraj Nair and Fei-Fei Li and Chelsea Finn},
+booktitle={5th Annual Conference on Robot Learning },
 year={2021},
-url={https://openreview.net/forum?id=_daq0uh6yXr},
-note={under review}
+url={https://openreview.net/forum?id=_daq0uh6yXr}
 }
 ```
 
