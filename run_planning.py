@@ -1,5 +1,4 @@
-
-"""Training script for VAE."""
+"""Planning Script."""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -60,6 +59,10 @@ flags.DEFINE_integer('cem_iters', 1,
                      'planning horizon')
 flags.DEFINE_integer('samples', 200,
                      'planning horizon')
+flags.DEFINE_string('wandb_entity', "surajn"
+                    'Weights and Biases Entity')
+flags.DEFINE_string('wandb_project', "lang",
+                    'Weights and Biases Project')
 
 
 def gt_reward(qpos, inital, instr):
@@ -168,8 +171,8 @@ def main(argv):
   np.random.seed(FLAGS.seed)
     
   ### Setup Logging
-  wandb.init(project="lang", name=FLAGS.expname, reinit=True,
-                    dir='wandb', entity="surajn")
+  wandb.init(project=FLAGS.wandb_project, name=FLAGS.expname, reinit=True,
+                    dir=tempfile.mkdtemp(), entity=FLAGS.wandb_entity)
   wandb.config.update(flags)
   batchsize = FLAGS.batchsize
   savedir = FLAGS.savedir + f"planning_{FLAGS.expname}_" + str(batchsize) + "_s" + \

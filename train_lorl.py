@@ -1,5 +1,4 @@
- 
-"""Training script for VAE."""
+"""Training script for LORL."""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -69,14 +68,14 @@ flags.DEFINE_integer('scratch', 0,
                      'LM from scratch (not pretrained)')
 flags.DEFINE_float('lr', 0.00001,
                      'learning rate')
-flags.DEFINE_integer('sthsth', 0,
-                     'Train with something something')
-flags.DEFINE_string('sthsthdatapath', None,
-                    'Path to folder with the HDF5 dataset and labels')
 flags.DEFINE_integer('holdout', 0,
                      'Holdout faucet left and black mug right tasks')
 flags.DEFINE_string('resume', None,
                     'What ckpt to resume from')
+flags.DEFINE_string('wandb_entity', "surajn"
+                    'Weights and Biases Entity')
+flags.DEFINE_string('wandb_project', "lang",
+                    'Weights and Biases Project')
 
 def augment(data, augmentation, batchsize):
   """ Augments batch of images """
@@ -128,25 +127,16 @@ def main(argv):
   np.random.seed(FLAGS.seed)
     
   ## Configure Weights and Biases Logging
-  wandb.init(project="lang", name=FLAGS.expname, reinit=True,
-                    dir=tempfile.mkdtemp(), entity="surajn")
+  wandb.init(project=FLAGS.wandb_project, name=FLAGS.expname, reinit=True,
+                    dir=tempfile.mkdtemp(), entity=FLAGS.wandb_entity)
   wandb.config.update(flags)
   batchsize = FLAGS.batchsize
   
   ## Logging Dir
-  savedir = FLAGS.savedir + f"{FLAGS.expname}/agile_" + str(batchsize) + "_s" + str(FLAGS.seed) + "_n" + str(FLAGS.num_labeled) + "_f" + str(FLAGS.finetune) + "_alpha" + str(FLAGS.alpha) + "_aug" + str(FLAGS.aug) + "_filter" + str(FLAGS.filter)  +"_fn" + str(FLAGS.fn) + "_hs" + str(FLAGS.hidden_size) +"_robot" + str(FLAGS.robot) +"_langaug" + str(FLAGS.langaug) +"_holdout" + str(FLAGS.holdout) +"_sthsth" + str(FLAGS.sthsth) + '/'
+  savedir = FLAGS.savedir + f"{FLAGS.expname}/lorl_" + str(batchsize) + "_s" + str(FLAGS.seed) + "_n" + str(FLAGS.num_labeled) + "_f" + str(FLAGS.finetune) + "_alpha" + str(FLAGS.alpha) + "_aug" + str(FLAGS.aug) + "_filter" + str(FLAGS.filter)  +"_fn" + str(FLAGS.fn) + "_hs" + str(FLAGS.hidden_size) +"_robot" + str(FLAGS.robot) +"_langaug" + str(FLAGS.langaug) +"_holdout" + str(FLAGS.holdout) +"_sthsth" + str(FLAGS.sthsth) + '/'
   if not os.path.exists(savedir):
     os.makedirs(savedir)
     
-  ## Load Something-Something Dataset
-  if FLAGS.sthsth:
-    print("SthSth" + "."*50)
-    sthsth_path = FLAGS.sthsthdatapath + "data.hdf5"
-    f = h5py.File(sthsth_path, 'r')
-    sthsth_data = f['sim']['ims'][:, :, :, :, :]
-    sthsthlangs = pd.read_csv(FLAGS.sthsthdatapath + "labels.csv")
-    sthsthlangs = sthsthlangs["Text Description"].str.strip().to_numpy().reshape(-1)
-
   ## Load data
   num_labeled = FLAGS.num_labeled
   path = FLAGS.datapath + "data.hdf5"
@@ -228,18 +218,6 @@ def main(argv):
     train_ims_0_batch = augment(train_ims_0_batch, aug, batchsize)
     train_ims_g_batch = augment(train_ims_g_batch, aug, batchsize)
     
-    ## Add Something-Something Data
-    if FLAGS.sthsth:
-      sth_indx = np.random.choice(sthsth_data.shape[0], batchsize//4, replace=True)
-      sthsth_batch = sthsth_data[sth_indx]
-      sth_cmds = sthsthlangs[sth_indx]
-      sth_0 = torch.FloatTensor(sthsth_batch[:, 0]).permute(0, 3, 1, 2).cuda()
-      sth_g = torch.FloatTensor(sthsth_batch[:, 1]).permute(0, 3, 1, 2).cuda()
-
-      traim_ims_0_batch = torch.cat([train_ims_0_batch[:-batchsize//4], sth_0], 0)
-      traim_ims_g_batch = torch.cat([train_ims_g_batch[:-batchsize//4], sth_g], 0)
-      train_l_goals = np.concatenate([train_l_goals[:-batchsize//4], (sth_cmds)])
-    
     ## Get Negative Examples
     train_ims_0_batch_shuf, train_ims_g_batch_shuf = get_neg_ep(train_ims_0_batch, train_ims_g_batch, train_l_goals)
     
@@ -313,10 +291,10 @@ def main(argv):
     ## Test Data Eval
     if (i % 100 == 0):
       test_pos_pair, _, test_l_goals, _ = sample_batch_model(batchsize, 
-                                                                                   image_data, actions, 
-                                                                                   langs, alpha=0, 
-                                                                                   sawyer=FLAGS.sawyer,
-                                                                                   robot=FLAGS.robot, holdout=FLAGS.holdout, selection=test_s)
+                                                             image_data, actions, 
+                                                             langs, alpha=0, 
+                                                             sawyer=FLAGS.sawyer,
+                                                             robot=FLAGS.robot, holdout=FLAGS.holdout, selection=test_s)
       test_ims_0_batch, test_ims_s1_batch, test_ims_s2_batch, test_ims_g_batch = extract_ims(test_pos_pair)
 
       with torch.no_grad():
