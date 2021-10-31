@@ -1,4 +1,4 @@
-"""Training script for LORL."""
+"""Training script for LOReL."""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -133,7 +133,7 @@ def main(argv):
   batchsize = FLAGS.batchsize
   
   ## Logging Dir
-  savedir = FLAGS.savedir + f"{FLAGS.expname}/lorl_" + str(batchsize) + "_s" + str(FLAGS.seed) + "_n" + str(FLAGS.num_labeled) + "_f" + str(FLAGS.finetune) + "_alpha" + str(FLAGS.alpha) + "_aug" + str(FLAGS.aug) + "_filter" + str(FLAGS.filter)  +"_fn" + str(FLAGS.fn) + "_hs" + str(FLAGS.hidden_size) +"_robot" + str(FLAGS.robot) +"_langaug" + str(FLAGS.langaug) +"_holdout" + str(FLAGS.holdout) +"_sthsth" + str(FLAGS.sthsth) + '/'
+  savedir = FLAGS.savedir + f"{FLAGS.expname}/lorel_" + str(batchsize) + "_s" + str(FLAGS.seed) + "_n" + str(FLAGS.num_labeled) + "_f" + str(FLAGS.finetune) + "_alpha" + str(FLAGS.alpha) + "_aug" + str(FLAGS.aug) + "_filter" + str(FLAGS.filter)  +"_fn" + str(FLAGS.fn) + "_hs" + str(FLAGS.hidden_size) +"_robot" + str(FLAGS.robot) +"_langaug" + str(FLAGS.langaug) +"_holdout" + str(FLAGS.holdout) +"_sthsth" + str(FLAGS.sthsth) + '/'
   if not os.path.exists(savedir):
     os.makedirs(savedir)
     

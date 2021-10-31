@@ -42,7 +42,7 @@ flags.DEFINE_string('expname', 'planning',
                     'WandB Name')
 flags.DEFINE_string('reward_path', 'logs/_maze_simple_reward_64_0.9_s0_lang1_/models_99000.pth',
                     'Path to reward model')
-flags.DEFINE_string('cost', 'lorl', 'Cost Function to use during planning')
+flags.DEFINE_string('cost', 'lorel', 'Cost Function to use during planning')
 flags.DEFINE_string('model_path', None, 
                     'Path to dynamics model folder')
 flags.DEFINE_string('instruction', 'close drawer',
@@ -91,7 +91,7 @@ def gt_reward(qpos, inital, instr):
   return dist, s
 
 
-def plan_learned(im, num_samples, model, ASIZE, cost="lorl", logdir = None, instruction = None, goalim=None, plansavedir=None, verbose=0, sv2p=None):
+def plan_learned(im, num_samples, model, ASIZE, cost="lorel", logdir = None, instruction = None, goalim=None, plansavedir=None, verbose=0, sv2p=None):
   """Plan actions to maximize reward using SV2P video prediction model"""
   ### Planning parameters
   CEM_ITERS = FLAGS.cem_iters
@@ -142,7 +142,7 @@ def plan_learned(im, num_samples, model, ASIZE, cost="lorl", logdir = None, inst
       rimg = (rimg - 0.5) * 2
       final_states = (final_states - 0.5) * 2
       rewards = loss_fn_alex(final_states, rimg).mean((1, 2, 3)).cpu().detach().numpy()
-    elif cost == "lorl":
+    elif cost == "lorel":
       rewards = d(im0.repeat(num_samples, 1, 1, 1), final_states, langs[:]).cpu().detach().numpy()
     if verbose:
       ### Logs all sampled predictions and associated reward
@@ -189,10 +189,10 @@ def main(argv):
   env.reset()
 
   
-  ## If using LORL load model
+  ## If using LOReL load model
   NUMTRIAL = batchsize
   hidden_size = FLAGS.hidden_size
-  if FLAGS.cost == "lorl":
+  if FLAGS.cost == "lorel":
     d = Discriminator(hidden_size).cuda()
     model_dicts = torch.load(FLAGS.reward_path)
     d.load_state_dict(model_dicts['d'])
