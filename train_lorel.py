@@ -72,7 +72,7 @@ flags.DEFINE_integer('holdout', 0,
                      'Holdout faucet left and black mug right tasks')
 flags.DEFINE_string('resume', None,
                     'What ckpt to resume from')
-flags.DEFINE_string('wandb_entity', "surajn"
+flags.DEFINE_string('wandb_entity', "surajn",
                     'Weights and Biases Entity')
 flags.DEFINE_string('wandb_project', "lang",
                     'Weights and Biases Project')
@@ -133,7 +133,7 @@ def main(argv):
   batchsize = FLAGS.batchsize
   
   ## Logging Dir
-  savedir = FLAGS.savedir + f"{FLAGS.expname}/lorel_" + str(batchsize) + "_s" + str(FLAGS.seed) + "_n" + str(FLAGS.num_labeled) + "_f" + str(FLAGS.finetune) + "_alpha" + str(FLAGS.alpha) + "_aug" + str(FLAGS.aug) + "_filter" + str(FLAGS.filter)  +"_fn" + str(FLAGS.fn) + "_hs" + str(FLAGS.hidden_size) +"_robot" + str(FLAGS.robot) +"_langaug" + str(FLAGS.langaug) +"_holdout" + str(FLAGS.holdout) +"_sthsth" + str(FLAGS.sthsth) + '/'
+  savedir = FLAGS.savedir + f"{FLAGS.expname}/lorel_" + str(batchsize) + "_s" + str(FLAGS.seed) + "_n" + str(FLAGS.num_labeled) + "_f" + str(FLAGS.finetune) + "_alpha" + str(FLAGS.alpha) + "_aug" + str(FLAGS.aug) + "_filter" + str(FLAGS.filter)  +"_fn" + str(FLAGS.fn) + "_hs" + str(FLAGS.hidden_size) +"_robot" + str(FLAGS.robot) +"_langaug" + str(FLAGS.langaug) +"_holdout" + str(FLAGS.holdout) + '/'
   if not os.path.exists(savedir):
     os.makedirs(savedir)
     
