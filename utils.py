@@ -51,7 +51,9 @@ def sample_batch_model(bs, ims, actions, desc=None, sawyer=0, robot=0, rl=0, hol
   im_ts1 = select_indices(ims, ts1)
   im_ts2 = select_indices(ims, ts2)
   im_tg = select_indices(ims, tg)
+  
   pos_act = select_indices(actions, ts1)
+  pos_act = np.stack([pos_act, select_indices(actions, tg)], -1)
   
   pos_pair_cat = np.stack([im_t0, im_ts1, im_ts2, im_tg], -1)
   return pos_pair_cat / 255., pos_act, d, index

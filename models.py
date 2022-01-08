@@ -129,3 +129,61 @@ class Encoder(nn.Module):
     hidden = self.fc2(hidden)
     return hidden
   
+class Policy(nn.Module):
+  def __init__(self, hidden_size, act_size, activation_function='relu', finetune = False, langaug=False):
+    super().__init__()
+    self.act_fn = getattr(F, activation_function)
+    self.sigm = nn.Sigmoid()
+    self.dropout = nn.Dropout(0.2)
+    self.senc = LangEncoder(finetune=finetune, aug=langaug)
+    lang_size = self.senc.lang_size
+    
+    self.enc =  Encoder(hidden_size, ch = 3)
+    self.fc1 = nn.Linear(lang_size + hidden_size , hidden_size)
+    self.fc2 = nn.Linear(hidden_size, hidden_size)
+    self.fc3 = nn.Linear(hidden_size, hidden_size)
+    self.fc4 = nn.Linear(hidden_size, act_size)
+    
+  def forward(self, obs, lang_goal):
+    ## Encode sentence
+    lang_emb = self.senc(lang_goal)
+    ## Encode image
+    enc = self.enc(obs)
+    ## Concatenate and predict action
+    h = torch.cat([enc, lang_emb], dim=-1)
+    h = self.dropout(self.act_fn(self.fc1(h)))
+    h = self.dropout(self.act_fn(self.fc2(h)))
+    h = self.dropout(self.act_fn(self.fc3(h)))
+    h = self.fc4(h)
+    return h
+
+  
+class QFunc(nn.Module):
+  def __init__(self, hidden_size, action_size, activation_function='relu', finetune = False, langaug=False):
+    super().__init__()
+    self.act_fn = getattr(F, activation_function)
+    self.sigm = nn.Sigmoid()
+    self.dropout = nn.Dropout(0.2)
+    self.senc = LangEncoder(finetune=finetune, aug=langaug)
+    lang_size = self.senc.lang_size
+    
+    self.enc =  Encoder(hidden_size, ch = 6)
+    self.fc1 = nn.Linear(lang_size + hidden_size + action_size, hidden_size)
+    self.fc2 = nn.Linear(hidden_size + action_size, hidden_size)
+    self.fc3 = nn.Linear(hidden_size + action_size, hidden_size)
+    self.fc4 = nn.Linear(hidden_size, 1)
+    
+  def forward(self, init_obs, obs, lang_goal, action):
+    ## Encode sentence
+    lang_emb = self.senc(lang_goal)
+    ## Encode initial and current image 
+    im_enc = self.enc(torch.cat([init_obs, obs], dim=1))
+    ## Concat image emb, sentence emb, and action to predict Q val
+    h = torch.cat([im_enc, lang_emb, action], dim=-1)
+    h = self.dropout(self.act_fn(self.fc1(h)))
+    h = torch.cat([h, action], dim=-1)
+    h = self.dropout(self.act_fn(self.fc2(h)))
+    h = torch.cat([h, action], dim=-1)
+    h = self.dropout(self.act_fn(self.fc3(h)))
+    h = self.fc4(h)
+    return h
