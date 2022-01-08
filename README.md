@@ -53,3 +53,13 @@ Finally, given the trained SV2P model and trained LOReL reward, you can run CEM 
 
 `python run_planning.py --batchsize=<NUMBER OF TRIALS> --savedir=logs/ --expname=<EXPERIMENT NAME> --reward_path=<PATH TO LOReL REWARD CHECKPOINT> --cost="lorel" --instruction="turn faucet right" --verbose=0 --hidden_size=128 --cem_iters=3 --samples=200 --model_path=<PATH TO SV2P DIRECTORY>`
 
+## Training LCBC and LCRL baselines
+
+The LCBC baseline trains vanilla behavior cloning conditioned on the language instruction:
+
+`python train_baselines.py  --batchsize=32 --datapath=<PATH TO DATA FOLDER> --savedir=logs/ --expname=<EXPERIMENT NAME> --num_labeled=<HOW MANY EPISODES TO USE> --aug=1 --hidden_size=128 --trainsteps=400000 --alpha=0 --rl=0`
+
+The LCRL baseline trains a Q function conditioned on the initial state and language, where terminal transitions have reward 1 and all other states have reward 0:
+
+`python train_baselines.py  --batchsize=32 --datapath=<PATH TO DATA FOLDER> --savedir=logs/ --expname=<EXPERIMENT NAME> --num_labeled=<HOW MANY EPISODES TO USE> --aug=1 --hidden_size=128 --trainsteps=400000 --alpha=0 --rl=1`
+
