@@ -63,3 +63,8 @@ The LCRL baseline trains a Q function conditioned on the initial state and langu
 
 `python train_baselines.py  --batchsize=32 --datapath=<PATH TO DATA FOLDER> --savedir=logs/ --expname=<EXPERIMENT NAME> --num_labeled=<HOW MANY EPISODES TO USE> --aug=1 --hidden_size=128 --trainsteps=400000 --alpha=0 --rl=1`
 
+To evaluate one of the trained baseline models simply run the `run_planning.py` file
+`python run_planning.py --batchsize=<NUMBER OF TRIALS> --savedir=logs/ --expname=<EXPERIMENT NAME> --reward_path=<PATH TO Q FUNC/POLICY  CHECKPOINT> --cost="q/bc" --instruction="turn faucet right" --verbose=0 --hidden_size=128 --cem_iters=3 --samples=200`
+
+
+
