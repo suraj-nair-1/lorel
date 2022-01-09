@@ -6,12 +6,13 @@ from __future__ import print_function
 import os
 import sys
 import copy
+import tempfile
 from absl import app
 from absl import flags
 import h5py
 import gym
 import lorl_env
-from models import Discriminator
+from models import Discriminator, Policy, QFunc
 import numpy as np
 from utils import save_im
 import torch
@@ -59,7 +60,7 @@ flags.DEFINE_integer('cem_iters', 1,
                      'planning horizon')
 flags.DEFINE_integer('samples', 200,
                      'planning horizon')
-flags.DEFINE_string('wandb_entity', "surajn"
+flags.DEFINE_string('wandb_entity', "surajn",
                     'Weights and Biases Entity')
 flags.DEFINE_string('wandb_project', "lang",
                     'Weights and Biases Project')
@@ -198,55 +199,69 @@ def main(argv):
     d.load_state_dict(model_dicts['d'])
     d.requires_grad = False
     d.eval()
+  elif FLAGS.cost == "bc":
+    p = Policy(hidden_size, ASIZE).cuda()
+    model_dicts = torch.load(FLAGS.reward_path)
+    p.load_state_dict(model_dicts['p'])
+    p.requires_grad = False
+    p.eval()
+  elif FLAGS.cost == "q":
+    qf = QFunc(hidden_size, ASIZE).cuda()
+    model_dicts = torch.load(FLAGS.reward_path)
+    qf.load_state_dict(model_dicts['q'])
+    qf.requires_grad = False
+    qf.eval()
   else:
     d = None
   instr = FLAGS.instruction
   
-  ## Load visual dynamics model
-  homedir = FLAGS.model_path
-  FLAGS.data_dir = homedir + '/data/'
-  FLAGS.output_dir = homedir + '/out/'
-  FLAGS.problem = 'lang_robot'
-  FLAGS.hparams = 'video_num_input_frames=1,video_num_target_frames=20'
-  FLAGS.hparams_set = 'next_frame_sv2p'
-  FLAGS.model = 'next_frame_sv2p'
-  # Create hparams
-  hparams = create_hparams()
-  hparams.video_num_input_frames = 1
-  hparams.video_num_target_frames = 20
+  if FLAGS.cost in ["lorel", "lpips", "pixel"]:
+    ## Load visual dynamics model
+    homedir = FLAGS.model_path
+    FLAGS.data_dir = homedir + '/data/'
+    FLAGS.output_dir = homedir + '/out/'
+    FLAGS.problem = 'lang_robot'
+    FLAGS.hparams = 'video_num_input_frames=1,video_num_target_frames=20'
+    FLAGS.hparams_set = 'next_frame_sv2p'
+    FLAGS.model = 'next_frame_sv2p'
+    # Create hparams
+    hparams = create_hparams()
+    hparams.video_num_input_frames = 1
+    hparams.video_num_target_frames = 20
 
-  # Params
-  num_replicas = FLAGS.samples
-  frame_shape = hparams.problem.frame_shape
-  forward_graph = tf.Graph()
-  with forward_graph.as_default():
-    forward_sess = tf.Session()
-    input_size = [num_replicas, hparams.video_num_input_frames]
-    target_size = [num_replicas, hparams.video_num_target_frames]
-    forward_placeholders = {
-        'inputs':
-            tf.placeholder(tf.float32, input_size + frame_shape),
-        'input_action':
-            tf.placeholder(tf.float32, input_size + [ASIZE]),
-        'targets':
-            tf.placeholder(tf.float32, target_size + frame_shape),
-        'target_action':
-            tf.placeholder(tf.float32, target_size + [ASIZE]),
-    }
-    # Creat model
-    forward_model_cls = registry.model(FLAGS.model)
-    forward_model = forward_model_cls(hparams, tf.estimator.ModeKeys.PREDICT)
-    forward_prediction_ops, _ = forward_model(forward_placeholders)
-    forward_saver = tf.train.Saver()
-    forward_saver.restore(forward_sess,
-                          homedir + '/out/model.ckpt-300000')
-    print('LOADED SV2P!')
-    sv2p_model = (forward_prediction_ops, forward_sess, forward_placeholders)
+    # Params
+    num_replicas = FLAGS.samples
+    frame_shape = hparams.problem.frame_shape
+    forward_graph = tf.Graph()
+    with forward_graph.as_default():
+      forward_sess = tf.Session()
+      input_size = [num_replicas, hparams.video_num_input_frames]
+      target_size = [num_replicas, hparams.video_num_target_frames]
+      forward_placeholders = {
+          'inputs':
+              tf.placeholder(tf.float32, input_size + frame_shape),
+          'input_action':
+              tf.placeholder(tf.float32, input_size + [ASIZE]),
+          'targets':
+              tf.placeholder(tf.float32, target_size + frame_shape),
+          'target_action':
+              tf.placeholder(tf.float32, target_size + [ASIZE]),
+      }
+      # Creat model
+      forward_model_cls = registry.model(FLAGS.model)
+      forward_model = forward_model_cls(hparams, tf.estimator.ModeKeys.PREDICT)
+      forward_prediction_ops, _ = forward_model(forward_placeholders)
+      forward_saver = tf.train.Saver()
+      forward_saver.restore(forward_sess,
+                            homedir + '/out/model.ckpt-300000')
+      print('LOADED SV2P!')
+      sv2p_model = (forward_prediction_ops, forward_sess, forward_placeholders)
 
   
   all_dists = []
   all_s = []
   for i in range(NUMTRIAL):
+    print(i)
     im = env.reset()
     
     ## Initialize state for different tasks
@@ -322,6 +337,35 @@ def main(argv):
         im, r, done, _ = env.step(a)
         episode_ims.append((im[:,:,:3]*255.0).astype(np.uint8))
         ## Measure success, if successful finish episode
+        dist, s = gt_reward(env.sim.data.qpos[:], initial_state, instr)
+        if s:
+          break
+    elif FLAGS.cost == "bc":
+      for _ in range(FLAGS.ph):
+        ims_s_batch = torch.FloatTensor(im).cuda().unsqueeze(0).permute(0, 3, 1, 2) 
+        a = p(ims_s_batch, [planinstr]).squeeze().cpu().detach().numpy()
+        im, r, done, _ = env.step(a)
+        episode_ims.append((im[:,:,:3]*255.0).astype(np.uint8))
+        ## Measure success, if successful finish episode
+        dist, s = gt_reward(env.sim.data.qpos[:], initial_state, instr)
+        if s:
+          break
+    elif FLAGS.cost == "q":
+      for _ in range(FLAGS.ph):
+        ## Action distribution
+        a_dist = torch.FloatTensor(NUM_ACTS, ASIZE).uniform_(-1, 1).cuda()
+        
+        ims_s_batch = torch.FloatTensor(im).cuda().unsqueeze(0).permute(0, 3, 1, 2) 
+        ims_s_batch = ims_s_batch.repeat(NUM_ACTS, 1, 1, 1)
+        ims_0_batch = torch.FloatTensor(initim).cuda().unsqueeze(0).permute(0, 3, 1, 2) 
+        ims_0_batch = ims_0_batch.repeat(NUM_ACTS, 1, 1, 1)
+        
+        ## Predicted Q vals per action
+        qvals = qf(ims_0_batch, ims_s_batch, [planinstr]*NUM_ACTS, a_dist).reshape(NUM_ACTS, -1)
+        qm, best = qvals.max(0)
+        a = a_dist[best][0] ## Select action with highest value
+        im, r, done, _ = env.step(a.cpu().detach().numpy())
+        episode_ims.append((im[:,:,:3]*255.0).astype(np.uint8))
         dist, s = gt_reward(env.sim.data.qpos[:], initial_state, instr)
         if s:
           break
