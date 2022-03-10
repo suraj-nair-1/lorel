@@ -37,8 +37,7 @@ class LorlTabletop(SawyerXYZEnv):
         self.max_path_length = max_path_length
         self.cur_path_length = 0
         self.xml = xml
-        
-        self.quick_init(locals())
+
         hand_low=(-0.3, 0.4, 0.0)
         hand_high=(0.3, 0.8, 0.15)
         obj_low=(-0.3, 0.4, 0.1)
@@ -91,16 +90,16 @@ class LorlTabletop(SawyerXYZEnv):
             done = False
         self.cur_path_length +=1
         return ob, 0, done, {}
-   
+
     def _get_obs(self):
         obs = self.sim.render(self.imsize_x, self.imsize, camera_name="cam0") / 255.
         obs = np.flip(obs, 0).copy()
         return obs
-    
+
     def reset_model(self):
         ''' For logging '''
         self.cur_path_length = 0
-            
+
         ### Reset gripper
         self._reset_hand()
         for _ in range(100):
@@ -126,15 +125,15 @@ class LorlTabletop(SawyerXYZEnv):
         for _ in range(100):
           self.sim.step()
         o = self._get_obs()
-        return o, {} 
+        return o, {}
 
 
     def _reset_hand(self, pos=None):
         if pos is None:
             if np.random.uniform() < 0.5:
-              pos = [-0.0, 0.5, 0.07]  
+              pos = [-0.0, 0.5, 0.07]
             else:
-              pos = [-0.2, 0.65, 0.07] + np.random.uniform(-0.05, 0.05, (3,)) 
+              pos = [-0.2, 0.65, 0.07] + np.random.uniform(-0.05, 0.05, (3,))
               pos[2] = 0.07
         for _ in range(100):
             self.data.set_mocap_pos('mocap', pos)
@@ -154,4 +153,4 @@ class LorlTabletop(SawyerXYZEnv):
 
     def compute_reward(self):
         return 0.0
-    
+
