@@ -5,12 +5,38 @@ This is code for the paper "Learning Language-Conditioned Robot Behavior from Of
 The code contains the Mujoco simulation environments used for training the agent, as well as the data collection script used to collect data and annotations from the simulator. It also contains the training script to train the LOReL language-conditioned reward function from either the simulated data (or pre-collected real robot data). It also contains code to load a pre-trained visual dynamics model, and use the dynamics model with the LOReL reward for executing language-conditioned tasks in simulation.
 
 ## Installation
+* LOReL has been tested on Python 3.6.13. Later versions may require updated dependency versions in `requirements.txt`.
+* It is recommended that a `virtualenv` or `conda` environment be used for installation.
+* In addition to the `pip` requirements, both `mujoco-py` and an older version of `metaworld` will need to be installed. Instructions are provided below.
+  * Note: either legacy (`<2.1`) or modern versions of `mujoco-py` will work; the latter simply requires a minor change to the `metaworld` setup.
 
-For installation please set up a virtual environment with conda/venv with python 3.6 and install requirements in `requirements.txt`.
+### Prerequisites
+#### Mujoco-py
+A valid `mujoco-py` install is required. Installation instructions can be found [here at the official Mujoco-py github](https://github.com/rlworkgroup/metaworld.git).
 
-For using the simulation environment, the key packages needed are `mujoco-py` and `metaworld`. For mujoco-py, be sure to have GPU rendering activated to make data collection and environment execution more efficient. For `metaworld` you may need an older [version](https://github.com/rlworkgroup/metaworld/tree/b016e6a25e485f1ffa8ccbf52df54ac204a81f31) of the codebase.
+In addition, it is recommended to have GPU rendering activated to make data collection and environment execution more efficient.
 
-The environment is located under the `env` folder and can be installed by calling `pip install -e .` from 
+#### Metaworld
+LOReL does not currently support the latest version of `metaworld`, so an older version must be used:
+```
+mkdir deps && cd deps
+git clone https://github.com/rlworkgroup/metaworld.git
+cd metaworld
+git checkout 73e1966e8a9b7e67cfc0ec14df68e61f16f39678
+pip install -e .
+cd ../..
+```
+
+Note: `mujoco-py >= 2.1` will work with this branch of `metaworld`. Simply update the `mujoco-py` version in `metaworld/setup.py`.
+
+### Installing LORel
+
+Finally, install `loral-env`:
+
+```
+pip install -r requirements.txt
+python install -e env
+```
 
 ## Data Collection / Annotation
 
@@ -43,9 +69,9 @@ url={https://openreview.net/forum?id=_daq0uh6yXr}
 
 ## Visual Dynamics Model
 
-If you want to use the same visual planning pipeline as the paper, you will need to use the SV2P video prediction model [Babaeizadeh et al]. The code for this model is part of the `tensor2tensor` package, and you'll want to clone and install this [custom version of tensor2tensor](https://github.com/suraj-nair-1/tensor2tensor). This installation is tricky - it will automatically upgrade the tensorflow version, however SV2P still requires and old version. You will need to downgrade `tensorflow-gpu` and associated tensorflow packages `tensorflow-probability`, etc. to the ones listed in the `requirements.txt`. You'll also need to manually install `gast=0.2.2`. 
+If you want to use the same visual planning pipeline as the paper, you will need to use the SV2P video prediction model [Babaeizadeh et al]. The code for this model is part of the `tensor2tensor` package, and you'll want to clone and install this [custom version of tensor2tensor](https://github.com/suraj-nair-1/tensor2tensor). This installation is tricky - it will automatically upgrade the tensorflow version, however SV2P still requires and old version. You will need to downgrade `tensorflow-gpu` and associated tensorflow packages `tensorflow-probability`, etc. to the ones listed in the `requirements.txt`. You'll also need to manually install `gast=0.2.2`.
 
-If the above is done correctly, you should be able to directly load the pre-trained SV2P data and SV2P model [here](https://drive.google.com/file/d/1hKbju9QSxYJbk5Ee3rnJif2VtWU-Vid-/view?usp=sharing). You can also re-train the SV2P dynamics model if desired using the `tensor2tensor` repo. 
+If the above is done correctly, you should be able to directly load the pre-trained SV2P data and SV2P model [here](https://drive.google.com/file/d/1hKbju9QSxYJbk5Ee3rnJif2VtWU-Vid-/view?usp=sharing). You can also re-train the SV2P dynamics model if desired using the `tensor2tensor` repo.
 
 ## Planning with Visual Dynamics + LOReL Reward
 
